@@ -7,8 +7,10 @@ import {
   FiClipboard,
   FiSettings,
   FiMenu,
-  FiX
+  FiX,
+  FiLogOut
 } from 'react-icons/fi';
+
 
 const navItems = [
   { name: 'Dashboard', path: '/dashboard', icon: FiHome },
@@ -18,58 +20,43 @@ const navItems = [
 ];
 
 const Sidebar = () => {
-  const [isOpen, setIsOpen] = useState(true);
-  const toggleSidebar = () => setIsOpen(!isOpen);
+  const navItems = [
+    { name: 'Dashboard', path: '/dashboard', icon: FiHome },
+    { name: 'Work Bases', path: '/workbases', icon: FiFolder },
+    { name: 'Settings', path: '/settings', icon: FiSettings },
+    { name: 'Logout', path: '/logout', icon: FiLogOut },
+
+
+  ];
 
   return (
-    <div className="relative bg-white border-r border-gray-200">
-      {/* Mobile toggle button */}
-      <button
-        onClick={toggleSidebar}
-        className="absolute top-4 left-4 md:hidden p-2 bg-gray-200 rounded"
-      >
-        {isOpen ? <FiX className="w-6 h-6" /> : <FiMenu className="w-6 h-6" />}
-      </button>
+    <motion.div
+      initial={{ x: -20, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 shadow-sm"
+    >
+      <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+        <h2 className="text-xl font-bold text-indigo-600 dark:text-indigo-400">Karya</h2>
+      </div>
+      <nav className="flex flex-col space-y-1 p-3">
+        {navItems.map((item, index) => (
+          <motion.a
+            key={item.name}
+            href={item.path}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className={`flex items-center px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors ${
+              window.location.pathname === item.path ? 'bg-gray-100 dark:bg-gray-700' : ''
+            }`}
+          >
+            <item.icon className="w-5 h-5 mr-3" />
+            {item.name}
+          </motion.a>
+        ))}
+      </nav>
+    </motion.div>
 
-      <motion.aside
-        initial={{ x: -250 }}
-        animate={{ x: isOpen ? 0 : -250 }}
-        transition={{ type: 'spring', stiffness: 80 }}
-        className={`min-h-[calc(100vh-3.5rem)] w-64 fixed md:relative z-50 ${
-          isOpen ? 'block' : 'hidden md:block'
-        }`}
-      >
-        <nav className="mt-6">
-          <ul>
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <motion.li
-                  key={item.name}
-                  whileHover={{ scale: 1.03 }}
-                  transition={{ type: 'spring', stiffness: 100 }}
-                  className="mb-1"
-                >
-                  <NavLink
-                    to={item.path}
-                    className={({ isActive }) =>
-                      `flex items-center px-4 py-3 text-sm transition-all rounded hover:bg-indigo-50 ${
-                        isActive
-                          ? 'bg-indigo-100 text-indigo-700 font-medium'
-                          : 'text-gray-700'
-                      }`
-                    }
-                  >
-                    <Icon className="w-5 h-5 mr-3" />
-                    {item.name}
-                  </NavLink>
-                </motion.li>
-              );
-            })}
-          </ul>
-        </nav>
-      </motion.aside>
-    </div>
   );
 };
 

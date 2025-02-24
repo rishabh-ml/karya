@@ -1,12 +1,17 @@
-import React from 'react';
-import AppRouter from './Router';
+import { Routes, Route } from 'react-router-dom';
+import LoginPage from './pages/auth/LoginPage';
+import SignUpPage from './pages/auth/SignUpPage';
+import DashboardPage from './pages/dashboard/DashboardPage';
 
-const App = () => {
+function App() {
   return (
-    <div className="App">
-      <AppRouter />
-    </div>
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/signup" element={<SignUpPage />} />
+      <Route path="/dashboard" element={<DashboardPage />} />
+      <Route path="*" element={<LoginPage />} />
+    </Routes>
   );
-};
+}
 
 export default App;

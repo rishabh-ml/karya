@@ -1,55 +1,95 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { motion } from 'framer-motion';
 
-function OTPVerificationModal({ email, onClose, onVerified }) {
+const OTPVerificationModal = ({ email, onVerify, onClose }) => {
   const [otp, setOtp] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleVerify = async () => {
-    if (!otp) {
-      setError('Please enter the OTP code.');
+  const handleVerify = async (e) => {
+    e.preventDefault();
+    
+    if (otp.length !== 6) {
+      setError('Please enter a valid 6-digit OTP');
       return;
     }
-    setError('');
 
-    // 1) Call backend e.g. POST /api/auth/verify-otp with { email, otp }
-    // 2) If success:
-    onVerified();
-    // 3) If error, setError('Invalid code') or similar
+    try {
+      setError('');
+      setLoading(true);
+      
+      const response = await fetch('/api/auth/verify-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          otp
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        onVerify(data);
+      } else {
+        setError(data.message || 'OTP verification failed');
+      }
+    } catch (err) {
+      setError('An error occurred during OTP verification');
+    }
+    
+    setLoading(false);
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="bg-white p-6 rounded shadow-md w-full max-w-sm relative">
-        <h3 className="text-xl font-semibold mb-2">Verify Email</h3>
-        <p className="text-sm text-gray-600 mb-4">We sent a code to <strong>{email}</strong>. Enter it below:</p>
-
-        {error && <p className="text-red-500 mb-2">{error}</p>}
-
-        <input
-          type="text"
-          value={otp}
-          onChange={(e) => setOtp(e.target.value)}
-          className="w-full border border-gray-300 rounded px-3 py-2 mb-4"
-          placeholder="Enter OTP code"
-        />
-
-        <div className="flex justify-end space-x-2">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 border rounded text-gray-600"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleVerify}
-            className="px-4 py-2 bg-indigo-600 text-white rounded"
-          >
-            Verify
-          </button>
-        </div>
-      </div>
-    </div>
+    <motion.div 
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      <motion.div 
+        className="bg-gray-800 p-6 rounded-lg w-96"
+        initial={{ y: -50 }}
+        animate={{ y: 0 }}
+        transition={{ type: 'spring', stiffness: 100 }}
+      >
+        <h2 className="text-xl font-bold mb-4">Verify Email</h2>
+        <p className="text-gray-400 mb-4">We've sent a 6-digit code to {email}</p>
+        
+        <form onSubmit={handleVerify}>
+          <input
+            type="text"
+            placeholder="Enter OTP"
+            value={otp}
+            onChange={(e) => setOtp(e.target.value)}
+            className="w-full p-2 mb-4 bg-gray-700 text-white rounded"
+          />
+          
+          {error && <div className="text-red-500 mb-4">{error}</div>}
+          
+          <div className="flex justify-end space-x-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-gray-400 hover:text-white"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              {loading ? 'Verifying...' : 'Verify'}
+            </button>
+          </div>
+        </form>
+      </motion.div>
+    </motion.div>
   );
-}
+};
 
 export default OTPVerificationModal;

@@ -1,150 +1,154 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import PasswordInput from './PasswordInput';
+import { useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import OTPVerificationModal from '../../modal/OTPVerificationModal';
 
-function SignUpForm() {
+const SignUpForm = () => {
   const [name, setName] = useState('');
-  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [showOTPModal, setShowOTPModal] = useState(false);
+  const { signup } = useAuth();
+  const navigate = useNavigate();
 
-  // For OTP verification
-  const [otpModalOpen, setOtpModalOpen] = useState(false);
-  const [isEmailVerified, setIsEmailVerified] = useState(false);
-
-  const handleSendOTP = async () => {
-    if (!email) {
-      setError('Please enter an email first.');
-      return;
-    }
-    setError('');
-
-    // 1) Call backend endpoint to send OTP to the user’s email
-    //    e.g. POST /api/auth/send-otp with { email }
-
-    // 2) On success, open the modal
-    setOtpModalOpen(true);
-  };
-
-  const handleSignUp = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!isEmailVerified) {
-      setError('Please verify your email before signing up.');
-      return;
-    }
-
+    
     if (password !== confirmPassword) {
-      setError('Passwords do not match.');
+      setError('Passwords do not match');
       return;
     }
 
-    // Additional validations as needed (empty fields, etc.)
+    try {
+      setError('');
+      setLoading(true);
+      
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          username,
+          password
+        }),
+      });
 
-    setError('');
-    // 3) Submit sign-up to the backend (POST /api/auth/signup)
-    //    e.g. { name, username, email, password }
-
-    // 4) Handle success (redirect to login or auto-login)
+      const data = await response.json();
+      
+      if (response.ok) {
+        setShowOTPModal(true);
+      } else {
+        setError(data.message || 'Signup failed');
+      }
+    } catch (err) {
+      setError('An error occurred during signup');
+    }
+    
+    setLoading(false);
   };
 
   return (
-    <div className="bg-white p-6 rounded shadow-md w-full max-w-md">
-      <h2 className="text-2xl font-bold mb-4">Create your Karya Account</h2>
+    <motion.form 
+      onSubmit={handleSubmit} 
+      className="space-y-4"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      {error && <div className="text-red-500">{error}</div>}
+      
+      <div>
+        <input
+          type="text"
+          placeholder="Full Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          className="w-full p-2 border rounded bg-gray-800 text-white"
+        />
+      </div>
+      
+      <div>
+        <input
+          type="email"
+          placeholder="Email Address"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          className="w-full p-2 border rounded bg-gray-800 text-white"
+        />
+      </div>
 
-      {error && <p className="text-red-500 mb-3">{error}</p>}
+      <div>
+        <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+          className="w-full p-2 border rounded bg-gray-800 text-white"
+        />
+      </div>
+      
+      <div>
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          className="w-full p-2 border rounded bg-gray-800 text-white"
+        />
+      </div>
 
-      <form onSubmit={handleSignUp}>
-        {/* Name Field */}
-        <div className="mb-4">
-          <label className="block mb-1 font-medium">Name</label>
-          <input
-            type="text"
-            className="w-full border border-gray-300 rounded px-3 py-2"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </div>
+      <div>
+        <input
+          type="password"
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          required
+          className="w-full p-2 border rounded bg-gray-800 text-white"
+        />
+      </div>
+      
+      <motion.button
+        type="submit"
+        disabled={loading}
+        className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        {loading ? 'Signing Up...' : 'Sign Up'}
+      </motion.button>
 
-        {/* Username Field */}
-        <div className="mb-4">
-          <label className="block mb-1 font-medium">Username</label>
-          <input
-            type="text"
-            className="w-full border border-gray-300 rounded px-3 py-2"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-        </div>
-
-        {/* Email Field */}
-        <div className="mb-4">
-          <label className="block mb-1 font-medium">Email</label>
-          <div className="flex space-x-2">
-            <input
-              type="email"
-              className="flex-grow border border-gray-300 rounded px-3 py-2"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <button
-              type="button"
-              className="bg-indigo-600 text-white py-2 px-4 rounded hover:bg-indigo-700"
-              onClick={handleSendOTP}
-            >
-              {isEmailVerified ? 'Verified' : 'Verify'}
-            </button>
-          </div>
-        </div>
-
-        {/* Password Field */}
-        <div className="mb-4">
-          <label className="block mb-1 font-medium">Password</label>
-          <PasswordInput
-            password={password}
-            onChange={(val) => setPassword(val)}
-          />
-        </div>
-
-        {/* Confirm Password Field */}
-        <div className="mb-4">
-          <label className="block mb-1 font-medium">Confirm Password</label>
-          <PasswordInput
-            password={confirmPassword}
-            onChange={(val) => setConfirmPassword(val)}
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 w-full"
-        >
-          Sign Up
-        </button>
-      </form>
-      <p className="mt-4 text-center text-sm">
-        Already have an account?{' '}
-        <Link to="/login" className="text-indigo-600 hover:underline">
-          Log In
-        </Link>
-      </p>
-
-      {/* OTP Verification Modal */}
-      {otpModalOpen && (
+      <div className="mt-4 text-center">
+        <p className="text-gray-400">
+          Already have an account?{' '}
+          <a href="/login" className="text-indigo-400 hover:underline">Log In</a>
+        </p>
+      </div>
+    
+      {showOTPModal && (
         <OTPVerificationModal
           email={email}
-          onClose={() => setOtpModalOpen(false)}
-          onVerified={() => {
-            setIsEmailVerified(true);
-            setOtpModalOpen(false);
+          onVerify={(data) => {
+            signup(data);
+            navigate('/dashboard');
           }}
+          onClose={() => setShowOTPModal(false)}
         />
       )}
-    </div>
+    </motion.form>
   );
-}
+};
 
 export default SignUpForm;
