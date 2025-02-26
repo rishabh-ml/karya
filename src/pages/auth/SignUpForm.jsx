@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
-import { useAuth } from '../../context/AuthContext';
+import {useAuth} from '../../context/AuthContext'
 
 const SignUpForm = () => {
   const [name, setName] = useState('');
