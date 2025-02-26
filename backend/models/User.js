@@ -1,3 +1,4 @@
+// backend/models/User.js
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
@@ -11,9 +12,24 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  username: {
+    type: String,
+    required: true,
+    unique: true
+  },
   password: {
     type: String,
     required: true
+  },
+  otp: {
+    type: Number
+  },
+  otpExpires: {
+    type: Date
+  },
+  verified: {
+    type: Boolean,
+    default: false
   },
   createdAt: {
     type: Date,

@@ -1,4 +1,6 @@
 import Task from '../models/Task.js';
+import mongoose from 'mongoose';
+
 
 // @desc    Get all tasks
 // @route   GET /api/tasks

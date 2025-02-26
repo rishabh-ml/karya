@@ -1,6 +1,7 @@
+// src/pages/auth/LoginPage.jsx
 import React from 'react';
 import { motion } from 'framer-motion';
-import LoginForm from '../../components/common/LoginForm';
+import LoginForm from './LoginForm';
 
 const LoginPage = () => {
   return (
@@ -8,7 +9,7 @@ const LoginPage = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="flex items-center justify-center min-h-screen bg-gray-100"
+      className="flex items-center justify-center min-h-screen bg-gray-50"
     >
       <LoginForm />
     </motion.div>

@@ -1,35 +1,28 @@
+// src/components/common/PasswordInput.jsx
 import React, { useState } from 'react';
-import { EyeIcon, EyeOffIcon } from '@heroicons/react/outline'; 
-// Or any other icon approach
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 
-function PasswordInput({ password, onChange }) {
+const PasswordInput = ({ value, onChange, placeholder = "Enter password" }) => {
   const [showPassword, setShowPassword] = useState(false);
-
-  const toggleShow = () => {
-    setShowPassword(!showPassword);
-  };
-
+  
   return (
     <div className="relative">
       <input
         type={showPassword ? 'text' : 'password'}
-        className="w-full border border-gray-300 rounded px-3 py-2 pr-10"
-        value={password}
+        placeholder={placeholder}
+        value={value}
         onChange={(e) => onChange(e.target.value)}
+        className="w-full border border-gray-300 rounded px-3 py-2 pr-10 focus:ring-2 focus:ring-indigo-500"
       />
       <button
         type="button"
-        onClick={toggleShow}
-        className="absolute right-2 top-2 text-gray-500"
+        onClick={() => setShowPassword(!showPassword)}
+        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 cursor-pointer"
       >
-        {showPassword ? (
-          <EyeOffIcon className="w-5 h-5" />
-        ) : (
-          <EyeIcon className="w-5 h-5" />
-        )}
+        {showPassword ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
       </button>
     </div>
   );
-}
+};
 
 export default PasswordInput;
